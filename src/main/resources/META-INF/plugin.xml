@@ -1,0 +1,100 @@
+<idea-plugin version="2">
+    <name>GradlePlug</name>
+    <description><![CDATA[
+        Provides integration with Gradle.
+        For more information, see <a href="https://github.com/shyiko/gradleplug/wiki">https://github.com/shyiko/gradleplug/wiki</a>
+    ]]></description>
+    <version>1.0</version>
+    <vendor email="stanley.shyiko@gmail.com" url="https://github.com/shyiko/gradleplug">Stanley Shyiko</vendor>
+    <idea-version since-build="8000"/>
+    <change-notes><![CDATA[
+        1.0
+        <ul>
+            <li>Intellij IDEA 10+ support</li>
+            <li>build.gradle & settings.gradle code completion</li>
+        </ul>
+    ]]></change-notes>
+
+    <depends>org.intellij.groovy</depends>
+
+    <module-components>
+        <component>
+            <implementation-class>gradleplug.dependencies.DependencySyncManager</implementation-class>
+        </component>
+    </module-components>
+
+    <project-components>
+        <component>
+            <implementation-class>gradleplug.toolwindow.GradleProjectsToolWindow</implementation-class>
+        </component>
+        <component>
+            <implementation-class>gradleplug.ResolverLoader</implementation-class>
+        </component>
+        <component>
+            <implementation-class>gradleplug.configuration.ProjectConfigurationProjectComponent</implementation-class>
+        </component>
+        <component>
+            <implementation-class>gradleplug.messages.MessagesProjectComponent</implementation-class>
+        </component>
+        <component>
+            <implementation-class>gradleplug.GradleProjectsManager</implementation-class>
+        </component>
+    </project-components>
+
+    <actions>
+        <action id="GradlePlug.AddProjectsAutomatically" class="gradleplug.actions.AddProjectsAutomaticallyAction"
+                icon="/nodes/addLocalWeblogicInstance.png"
+                text="Find Gradle projects under content roots and add them automatically"/>
+        <action id="GradlePlug.AddProject" class="gradleplug.actions.AddProjectAction" icon="/general/add.png"
+                text="Add Gradle project manually"/>
+        <action id="GradlePlug.RemoveProject" class="gradleplug.actions.RemoveProjectAction" icon="/general/remove.png"
+                text="Remove selected projects" description="Remove selected projects (no files will be deleted)"/>
+        <action id="GradlePlug.ReimportProject" class="gradleplug.actions.ReimportProjectAction" icon="/images/sync.png"
+                text="Reimport selected projects"/>
+        <action id="GradlePlug.ReimportAllProjects" class="gradleplug.actions.ReimportAllProjectsAction"
+                icon="/actions/sync.png"
+                text="Reimport all Gradle projects"/>
+        <action id="GradlePlug.EditSettings" class="gradleplug.actions.EditSettingsAction"
+                icon="/general/projectSettings.png"
+                text="Edit Gradle integration settings for the current project"/>
+        <action id="GradlePlug.ReimportTasks" class="gradleplug.actions.ReimportTasksAction"
+                text="Reload Tasks"/>
+
+        <group id="Gradle.ToolWindow.Toolbar">
+            <reference id="GradlePlug.AddProjectsAutomatically"/>
+            <separator/>
+            <reference id="GradlePlug.AddProject"/>
+            <reference id="GradlePlug.RemoveProject"/>
+            <separator/>
+            <reference id="GradlePlug.ReimportProject"/>
+            <reference id="GradlePlug.ReimportAllProjects"/>
+            <separator/>
+            <reference id="GradlePlug.EditSettings"/>
+        </group>
+
+        <group id="Gradle.ToolTree.ProjectNode.Menu">
+            <reference id="GradlePlug.RemoveProject"/>
+            <separator/>
+            <reference id="GradlePlug.ReimportProject"/>
+            <reference id="GradlePlug.ReimportTasks"/>
+        </group>
+
+        <group id="Gradle.ToolTree.TaskNode.Menu">
+            <reference ref="RunContextGroup"/>
+        </group>
+    </actions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <projectConfigurable implementation="gradleplug.configuration.ProjectConfigurationEditor"/>
+        <configurationType implementation="gradleplug.GradleTaskConfigurationType"/>
+        <configurationProducer implementation="gradleplug.GradleTaskRuntimeConfigurationProducer"/>
+        <completion.contributor language="Groovy" implementationClass="gradleplug.syntax.BuildGradleCompletionContributor"/>
+        <completion.contributor language="Groovy" implementationClass="gradleplug.syntax.SettingsGradleCompletionContributor"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="org.intellij.groovy">
+        <membersContributor implementation="gradleplug.syntax.BuildGradleMembersContributor"/>
+        <membersContributor implementation="gradleplug.syntax.SettingsGradleMembersContributor"/>
+    </extensions>
+
+</idea-plugin>

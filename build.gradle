@@ -1,0 +1,32 @@
+defaultTasks 'clean', 'zip'
+
+apply plugin: 'java'
+
+configurations {
+    zip
+}
+
+repositories {
+	flatDir name: 'idea/lib', dirs: "${property('idea.home')}/lib"
+	flatDir name: 'idea/plugins/Groovy/lib', dirs: "${property('idea.home')}/plugins/Groovy/lib"
+}
+
+dependencies {
+    compile ':idea', ':jdom', ':openapi', ':util', ':extensions', ':annotations', ':Groovy'
+}
+
+task ('zip', type: Zip).doFirst {
+    project.dependencies {
+		zip project(":gradleplug-resolver-impl")
+	}
+    archiveName = "gradleplug-${project.property('build.number')}"
+    into('gradleplug/lib') {
+        from configurations.archives.allArtifactFiles.files
+    }
+    into('gradleplug/lib/ext') {
+        from configurations.zip.files.grep({it.name.startsWith('gradleplug-resolver-impl')})
+    }
+}
+getChildProjects().each {String name, Project childProject ->
+	zip.dependsOn ":${name}:jar"
+}

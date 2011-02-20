@@ -1,0 +1,12 @@
+apply plugin: 'java'
+
+repositories {
+	flatDir name: 'idea/lib', dirs: "${property('idea.home')}/lib"
+    flatDir name: 'idea/plugins/Groovy/lib', dirs: "${property('idea.home')}/plugins/Groovy/lib"
+}
+
+dependencies {
+    compile project(":")
+    compile gradleApi()
+    compile ':openapi', ':util', ':extensions'
+}

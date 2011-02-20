@@ -1,0 +1,17 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+configurations {
+    testCompile {
+        transitive = false
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "com.github.shyiko.jsst:jsst-core:1.0.4"
+    testCompile "junit:junit:4.8.2"
+}
