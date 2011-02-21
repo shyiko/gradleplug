@@ -10,3 +10,12 @@ dependencies {
     compile gradleApi()
     compile ':openapi', ':util', ':extensions'
 }
+
+task ('uploadToIDEAPluginSandbox', dependsOn: 'jar') {
+    def extDir = "${project.property('idea.home')}/work/system/plugins-sandbox/plugins/gradleplug/lib/ext"
+    file("${extDir}/${project.name}.jar").delete()
+    copy {
+        from configurations.archives.allArtifactFiles.files
+        into extDir
+    }
+}
