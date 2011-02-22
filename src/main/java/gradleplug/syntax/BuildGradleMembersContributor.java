@@ -22,6 +22,6 @@ package gradleplug.syntax;
 public class BuildGradleMembersContributor extends MembersContributor {
 
     public BuildGradleMembersContributor() {
-        super("build.gradle", "org.gradle.api.Project");
+        super("build.gradle", BuildGradleStructureProvider.getInstance());
     }
 }

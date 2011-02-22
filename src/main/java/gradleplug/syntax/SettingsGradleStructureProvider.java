@@ -15,13 +15,27 @@
  */
 package gradleplug.syntax;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Properties;
+
 /**
  * @author <a href="mailto:stanley.shyiko@gmail.com">shyiko</a>
- * @since 20.02.2011
+ * @since 22.02.2011
  */
-public class SettingsGradleMembersContributor extends MembersContributor {
+public class SettingsGradleStructureProvider extends StructureProvider {
 
-    public SettingsGradleMembersContributor() {
-        super("settings.gradle", SettingsGradleStructureProvider.getInstance());
+    private SettingsGradleStructureProvider() {
+        super("org.gradle.api.initialization.Settings", Collections.<String, String>emptyMap());
+    }
+
+    private static class SettingsGradleStructureProviderHolder {
+        private static final SettingsGradleStructureProvider instance = new SettingsGradleStructureProvider();
+    }
+
+    public static SettingsGradleStructureProvider getInstance() {
+        return SettingsGradleStructureProviderHolder.instance;
     }
 }

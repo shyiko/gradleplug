@@ -22,6 +22,6 @@ package gradleplug.syntax;
 public class SettingsGradleCompletionContributor extends CompletionContributor {
 
     public SettingsGradleCompletionContributor() {
-        super("settings.gradle", "org.gradle.api.initialization.Settings");
+        super("settings.gradle", SettingsGradleStructureProvider.getInstance());
     }
 }

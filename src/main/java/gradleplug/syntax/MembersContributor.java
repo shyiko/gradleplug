@@ -21,6 +21,7 @@ import com.intellij.psi.*;
 import com.intellij.psi.scope.PsiScopeProcessor;
 import com.intellij.psi.search.GlobalSearchScope;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.plugins.groovy.lang.completion.GroovyCompletionUtil;
 import org.jetbrains.plugins.groovy.lang.psi.GroovyPsiElement;
 import org.jetbrains.plugins.groovy.lang.resolve.NonCodeMembersContributor;
 import org.jetbrains.plugins.groovy.lang.resolve.ResolveUtil;
@@ -32,11 +33,11 @@ import org.jetbrains.plugins.groovy.lang.resolve.ResolveUtil;
 public abstract class MembersContributor extends NonCodeMembersContributor {
 
     private String fileName;
-    private String className;
+    private StructureProvider structureProvider;
 
-    protected MembersContributor(String fileName, String className) {
+    protected MembersContributor(String fileName, StructureProvider structureProvider) {
         this.fileName = fileName;
-        this.className = className;
+        this.structureProvider = structureProvider;
     }
 
     @Override
@@ -46,14 +47,8 @@ public abstract class MembersContributor extends NonCodeMembersContributor {
         if (virtualFile == null || !fileName.equalsIgnoreCase(virtualFile.getName())) {
             return;
         }
-        Project project = place.getProject();
-        JavaPsiFacade javaPsiFacade = JavaPsiFacade.getInstance(project);
-        GlobalSearchScope scope = GlobalSearchScope.allScope(project);
-        PsiClass projectPsiClass = javaPsiFacade.findClass(className, scope);
-        if (projectPsiClass == null) {
-            return;
-        }
-        for (PsiMethod psiMethod : projectPsiClass.getMethods()) {
+        PsiMethod[] methods = structureProvider.getMethods(place);
+        for (PsiMethod psiMethod : methods) {
             if (!ResolveUtil.processElement(processor, psiMethod, state)) {
                 return;
             }

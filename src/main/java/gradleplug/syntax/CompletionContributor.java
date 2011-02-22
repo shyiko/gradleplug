@@ -33,11 +33,11 @@ import org.jetbrains.plugins.groovy.lang.completion.GroovyCompletionUtil;
 public abstract class CompletionContributor extends com.intellij.codeInsight.completion.CompletionContributor {
 
     private String fileName;
-    private String className;
+    private StructureProvider structureProvider;
 
-    protected CompletionContributor(String fileName, String className) {
+    protected CompletionContributor(String fileName, StructureProvider structureProvider) {
         this.fileName = fileName;
-        this.className = className;
+        this.structureProvider = structureProvider;
     }
 
     @Override
@@ -47,15 +47,8 @@ public abstract class CompletionContributor extends com.intellij.codeInsight.com
         if (virtualFile == null || !fileName.equalsIgnoreCase(virtualFile.getName())) {
             return;
         }
-        Project project = containingFile.getProject();
-        JavaPsiFacade javaPsiFacade = JavaPsiFacade.getInstance(project);
-        GlobalSearchScope scope = GlobalSearchScope.allScope(project);
-        PsiClass projectPsiClass = javaPsiFacade.findClass(className, scope);
-        if (projectPsiClass == null) {
-            return;
-        }
-        //todo: optimize
-        for (PsiMethod psiMethod : projectPsiClass.getMethods()) {
+        PsiMethod[] methods = structureProvider.getMethods(parameters.getPosition());
+        for (PsiMethod psiMethod : methods) {
             result.addElement(GroovyCompletionUtil.generateLookupElement(psiMethod));
         }
     }

@@ -22,6 +22,6 @@ package gradleplug.syntax;
 public class BuildGradleCompletionContributor extends CompletionContributor {
 
     public BuildGradleCompletionContributor() {
-        super("build.gradle", "org.gradle.api.Project");
+        super("build.gradle", BuildGradleStructureProvider.getInstance());
     }
 }
