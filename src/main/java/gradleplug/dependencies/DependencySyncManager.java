@@ -29,7 +29,9 @@ import gradleplug.resolving.dependencies.ResolvedLibraryDependency;
 import gradleplug.resolving.dependencies.ResolvedModuleDependency;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -109,29 +111,31 @@ public class DependencySyncManager extends ModuleComponentAdapter {
 
     private void mergeLibraryDependencies(ModifiableRootModel modifiableModuleModel, Set<ResolvedLibraryDependency> libraryDependenciesToCommit) {
         LibraryTable projectLibraryTable = libraryTablesRegistrar.getLibraryTable(project);
-        Set<String> moduleLibraries = getModuleLibraries(modifiableModuleModel);
-        for (ResolvedLibraryDependency ResolvedLibraryDependency : libraryDependenciesToCommit) {
-            String libraryName = getLibraryName(ResolvedLibraryDependency);
+        Map<String, LibraryOrderEntry> moduleLibraries = getModuleLibraries(modifiableModuleModel);
+        for (ResolvedLibraryDependency resolvedLibraryDependency : libraryDependenciesToCommit) {
+            String libraryName = getLibraryName(resolvedLibraryDependency);
             Library library = projectLibraryTable.getLibraryByName(libraryName);
             if (library == null) {
                 library = projectLibraryTable.createLibrary(libraryName);
             }
-            if (!moduleLibraries.contains(libraryName)) {
-                moduleLibraries.add(libraryName);
-                modifiableModuleModel.addLibraryEntry(library);
+            LibraryOrderEntry libraryOrderEntry = moduleLibraries.get(libraryName);
+            if (libraryOrderEntry == null) {
+                libraryOrderEntry = modifiableModuleModel.addLibraryEntry(library);
+                moduleLibraries.put(libraryName, libraryOrderEntry);
             }
-            mergeResolvedLibraryDependency(library, ResolvedLibraryDependency);
+            libraryOrderEntry.setScope(getDependencyScope(resolvedLibraryDependency));
+            mergeResolvedLibraryDependency(library, resolvedLibraryDependency);
         }
     }
 
-    private Set<String> getModuleLibraries(ModifiableRootModel modifiableModuleModel) {
-        Set<String> result = new HashSet<String>();
+    private Map<String, LibraryOrderEntry> getModuleLibraries(ModifiableRootModel modifiableModuleModel) {
+        Map<String, LibraryOrderEntry> result = new HashMap<String, LibraryOrderEntry>();
         for (OrderEntry orderEntry : modifiableModuleModel.getOrderEntries()) {
             if (orderEntry instanceof LibraryOrderEntry) {
                 LibraryOrderEntry libraryOrderEntry = (LibraryOrderEntry) orderEntry;
                 String libName = libraryOrderEntry.getLibraryName();
                 if (libName != null) {
-                    result.add(libName);
+                    result.put(libName, libraryOrderEntry);
                 }
             }
         }
@@ -141,6 +145,21 @@ public class DependencySyncManager extends ModuleComponentAdapter {
     private String getLibraryName(ResolvedLibraryDependency ResolvedLibraryDependency) {
         return String.format("%s%s:%s:%s", LIBRARY_PREFIX,
                 ResolvedLibraryDependency.getOrg(), ResolvedLibraryDependency.getModule(), ResolvedLibraryDependency.getRev());
+    }
+
+    private DependencyScope getDependencyScope(ResolvedLibraryDependency dependency) {
+        switch (dependency.getScope()) {
+            case COMPILE:
+                return DependencyScope.COMPILE;
+            case PROVIDED:
+                return DependencyScope.PROVIDED;
+            case RUNTIME:
+                return DependencyScope.RUNTIME;
+            case TEST:
+                return DependencyScope.TEST;
+            default:
+                throw new UnsupportedOperationException();
+        }
     }
 
     private void mergeModuleDependencies(ModifiableRootModel modifiableModuleModel, Set<ResolvedModuleDependency> moduleDependenciesToCommit) {
